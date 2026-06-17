@@ -1,11 +1,99 @@
+# ===================== 系统自带文件 =====================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+# Windows 缩略图、回收站文件
+$RECYCLE.BIN/
+
+# ===================== IDE 编辑器配置 =====================
+# IDEA / JetBrains全家桶
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+# VS Code
+.vscode/
+*.code-workspace
+# Eclipse
+.classpath
+.project
+.c9/
+# 其他编辑器
+*.sublime-project
+*.sublime-workspace
+
+# ===================== Java 后端专用 =====================
+# 编译class文件
 target/
+*.class
+# Maven
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
 pom.xml.next
 release.properties
 dependency-reduced-pom.xml
-buildNumber.properties
-.mvn/timing.properties
-# https://github.com/takari/maven-wrapper#usage-without-binary-jar
-.mvn/wrapper/maven-wrapper.jar
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+# 日志文件
+logs/
+*.log
+*.gz
+# 数据库本地缓存
+*.h2.db
+*.mv.db
+# 本地环境配置（避免泄露账号密码）
+application-dev.yml
+application-local.yml
+application-test.yml
+# 临时备份
+*.bak
+# tomcat/temp 临时文件
+temp/
+
+# ===================== 前端 Vue/React/NodeJS 专用 =====================
+# 依赖包
+node_modules/
+# 打包产物
+dist/
+build/
+# npm/yarn 日志
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+# 本地环境变量
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+# 前端缓存
+.eslintcache
+.pnp
+.pnp.js
+coverage/
+# vite/webpack临时文件
+.cache/
+.npm
+.eslintcache
+# 编辑器自动生成的local配置
+.local
+
+# ===================== 数据库、缓存、临时文件 =====================
+*.sql
+*.sqlite
+*.sqlite3
+dump.sql
+redis-dump.rdb
+# 上传临时文件
+upload/
+temp-file/
+
+# ===================== Git 自身无关文件 =====================
+.gitignore
+# 空文件夹占位文件（可选）
+# !.gitkeep
