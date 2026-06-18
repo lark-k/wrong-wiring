@@ -443,6 +443,40 @@ select {
   border-top: 2px dashed #ffbf69;
 }
 
+.phasor-legend {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.phasor-legend .phase-a,
+.phasor-legend .phase-b,
+.phasor-legend .phase-c {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.phasor-legend .phase-a {
+  background: #f2c94c;
+}
+
+.phasor-legend .phase-b {
+  background: #36b37e;
+}
+
+.phasor-legend .phase-c {
+  background: #ef4e4e;
+}
+
+.phasor-legend .solid-line {
+  background: #607189;
+}
+
+.phasor-legend .current-line {
+  background: transparent;
+  border-top: 3px dashed #607189;
+}
+
 .wiring-svg,
 .phasor-svg {
   display: block;
@@ -545,6 +579,11 @@ select {
 .axis-label {
   fill: #7890a6;
   font-size: 12px;
+}
+
+.angle-label.zero-angle {
+  text-anchor: start;
+  dominant-baseline: middle;
 }
 
 .phasor-line {
@@ -1090,13 +1129,11 @@ select,
 
 .phasor-line.voltage {
   stroke: #3f6fc7;
-  marker-end: url(#arrow-voltage);
 }
 
 .phasor-line.current {
   stroke: #f59e0b;
   stroke-dasharray: 7 6;
-  marker-end: url(#arrow-current);
 }
 
 .phasor-line.broken {
@@ -1182,4 +1219,224 @@ select,
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
+}
+
+.fault-subpanel {
+  margin-top: 8px;
+  padding: 9px 10px;
+  border: 1px solid #d9e3ef;
+  border-radius: 8px;
+  background: #f8fbff;
+}
+
+.subpanel-title {
+  margin-bottom: 6px;
+  color: #172033;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.field-group.compact {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  padding: 5px 0;
+}
+
+.field-group.compact:first-of-type {
+  border-top: 0;
+}
+
+.field-group.compact > label {
+  margin-bottom: 0;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.field-group.compact select {
+  min-height: 34px;
+}
+
+.field-group.compact .phase-grid {
+  gap: 5px;
+}
+
+.field-group.compact .toggle-tile {
+  min-height: 34px;
+  padding: 0 4px;
+  font-size: 11px;
+}
+
+.fault-panel {
+  padding: 10px;
+}
+
+.panel-heading {
+  padding-bottom: 8px;
+}
+
+.fault-panel > .field-group {
+  padding: 8px 0;
+}
+
+.fault-panel > .field-group > label,
+.fault-panel .row-between > label {
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
+.fault-panel .numeric-field {
+  grid-template-columns: 1fr 34px;
+}
+
+.fault-panel input,
+.fault-panel select {
+  min-height: 34px;
+}
+
+.fault-panel .numeric-field input {
+  padding: 0 10px;
+}
+
+.fault-panel .slider-row {
+  grid-template-columns: 60px 1fr 34px;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.fault-panel .switch span {
+  width: 38px;
+  height: 22px;
+}
+
+.fault-panel .switch span::after {
+  top: 3px;
+  left: 3px;
+}
+
+.fault-panel .switch input:checked + span::after {
+  transform: translateX(16px);
+}
+
+.fault-panel .button-stack {
+  gap: 7px;
+  padding-top: 8px;
+}
+
+.fault-panel .primary-button,
+.fault-panel .secondary-button {
+  min-height: 34px;
+}
+
+.terminal-dot.voltage.a,
+.terminal-dot.current.a,
+.terminal-dot.reverse-current.a {
+  fill: #f2c94c;
+  stroke: #b7791f;
+}
+
+.terminal-dot.voltage.b,
+.terminal-dot.current.b,
+.terminal-dot.reverse-current.b {
+  fill: #36b37e;
+  stroke: #1f7a57;
+}
+
+.terminal-dot.voltage.c,
+.terminal-dot.current.c,
+.terminal-dot.reverse-current.c {
+  fill: #ef4e4e;
+  stroke: #b42336;
+}
+
+.phasor-line.voltage.a,
+.phasor-line.current.a {
+  stroke: #f2c94c;
+}
+
+.phasor-line.voltage.b,
+.phasor-line.current.b {
+  stroke: #36b37e;
+}
+
+.phasor-line.voltage.c,
+.phasor-line.current.c {
+  stroke: #ef4e4e;
+}
+
+.phasor-line.current {
+  stroke-dasharray: 8 6;
+}
+
+.phasor-label {
+  font-size: 18px;
+  font-weight: 950;
+  stroke: #ffffff;
+  stroke-width: 5px;
+  paint-order: stroke fill;
+}
+
+.phasor-label.a {
+  fill: #9a6200;
+}
+
+.phasor-label.b {
+  fill: #14734f;
+}
+
+.phasor-label.c {
+  fill: #b42336;
+}
+
+.phasor-label.current.a {
+  fill: #805600;
+}
+
+.phasor-label.current.b {
+  fill: #0f5d40;
+}
+
+.phasor-label.current.c {
+  fill: #8f1d2c;
+}
+
+.terminal-label.a,
+.terminal-label.fault.a {
+  fill: #9a6200;
+}
+
+.terminal-label.b,
+.terminal-label.fault.b {
+  fill: #14734f;
+}
+
+.terminal-label.c,
+.terminal-label.fault.c {
+  fill: #b42336;
+}
+
+.terminal-label.n {
+  fill: #334155;
+}
+
+.vector-name.phase-a span,
+.vector-name.phase-a small,
+.vector-name span.phase-a,
+.vector-row strong.phase-a {
+  color: #9a6200;
+}
+
+.vector-name.phase-b span,
+.vector-name.phase-b small,
+.vector-name span.phase-b,
+.vector-row strong.phase-b {
+  color: #14734f;
+}
+
+.vector-name.phase-c span,
+.vector-name.phase-c small,
+.vector-name span.phase-c,
+.vector-row strong.phase-c {
+  color: #b42336;
 }

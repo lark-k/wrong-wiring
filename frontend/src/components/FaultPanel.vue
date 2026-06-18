@@ -19,45 +19,49 @@
       </div>
     </section>
 
-    <section class="field-group">
-      <label>断相选择</label>
-      <div class="phase-grid">
-        <button
-          v-for="phase in phases"
-          :key="`b-${phase}`"
-          class="toggle-tile"
-          :class="{ active: model.broken[phase] }"
-          type="button"
-          @click="model.broken[phase] = !model.broken[phase]"
-        >
-          {{ phase }}相断线
-        </button>
-      </div>
-    </section>
+    <section v-for="group in groups" :key="group.key" class="fault-subpanel">
+      <div class="subpanel-title">{{ group.title }}</div>
 
-    <section class="field-group">
-      <label>反接选择</label>
-      <div class="phase-grid">
-        <button
-          v-for="phase in phases"
-          :key="`r-${phase}`"
-          class="toggle-tile danger"
-          :class="{ active: model.reversed[phase] }"
-          type="button"
-          @click="model.reversed[phase] = !model.reversed[phase]"
-        >
-          {{ phase }}相反接
-        </button>
+      <div class="field-group compact">
+        <label>断相选择</label>
+        <div class="phase-grid">
+          <button
+            v-for="phase in phases"
+            :key="`${group.key}-b-${phase}`"
+            class="toggle-tile"
+            :class="{ active: model[group.key].broken[phase] }"
+            type="button"
+            @click="model[group.key].broken[phase] = !model[group.key].broken[phase]"
+          >
+            {{ phase }}相断线
+          </button>
+        </div>
       </div>
-    </section>
 
-    <section class="field-group">
-      <label for="phaseOrder">换相选择</label>
-      <select id="phaseOrder" v-model="phaseOrderText">
-        <option v-for="option in orderOptions" :key="option.value" :value="option.value">
-          {{ option.label }}
-        </option>
-      </select>
+      <div class="field-group compact">
+        <label>反接选择</label>
+        <div class="phase-grid">
+          <button
+            v-for="phase in phases"
+            :key="`${group.key}-r-${phase}`"
+            class="toggle-tile danger"
+            :class="{ active: model[group.key].reversed[phase] }"
+            type="button"
+            @click="model[group.key].reversed[phase] = !model[group.key].reversed[phase]"
+          >
+            {{ phase }}相反接
+          </button>
+        </div>
+      </div>
+
+      <div class="field-group compact">
+        <label :for="`${group.key}PhaseOrder`">换相选择</label>
+        <select :id="`${group.key}PhaseOrder`" :value="model[group.key].phaseOrder.join('')" @change="setPhaseOrder(group.key, $event.target.value)">
+          <option v-for="option in orderOptions" :key="option.value" :value="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+      </div>
     </section>
 
     <section class="field-group">
@@ -98,13 +102,16 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
 import { Play, RotateCcw, Shuffle, SlidersHorizontal } from 'lucide-vue-next'
 
 const model = defineModel({ type: Object, required: true })
 defineEmits(['simulate', 'reset', 'randomize'])
 
 const phases = ['A', 'B', 'C']
+const groups = [
+  { key: 'voltage', title: '电压故障' },
+  { key: 'current', title: '电流故障' }
+]
 const orderOptions = [
   { value: 'ABC', label: 'ABC 正确顺序' },
   { value: 'BAC', label: 'BAC，A/B 互换' },
@@ -114,10 +121,7 @@ const orderOptions = [
   { value: 'CAB', label: 'CAB，循环错位' }
 ]
 
-const phaseOrderText = computed({
-  get: () => model.value.phaseOrder.join(''),
-  set: (value) => {
-    model.value.phaseOrder = value.split('')
-  }
-})
+function setPhaseOrder(groupKey, value) {
+  model.value[groupKey].phaseOrder = value.split('')
+}
 </script>

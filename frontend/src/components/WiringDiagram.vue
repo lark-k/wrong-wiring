@@ -18,8 +18,8 @@
         <text class="row-title" x="34" y="40">正确情况</text>
         <rect x="20" y="56" width="820" height="86" rx="10" />
         <g v-for="terminal in terminalNodes" :key="`correct-${terminal.key}`">
-          <circle class="terminal-dot" :class="terminal.kind" :cx="terminal.x" cy="92" r="18" />
-          <text class="terminal-label" :x="terminal.x" y="132">{{ terminal.label }}</text>
+          <circle class="terminal-dot" :class="[terminal.kind, terminal.phase.toLowerCase()]" :cx="terminal.x" cy="92" r="18" />
+          <text class="terminal-label" :class="terminal.phase.toLowerCase()" :x="terminal.x" y="132">{{ terminal.label }}</text>
         </g>
       </g>
 
@@ -29,14 +29,14 @@
         <g v-for="terminal in faultTerminalNodes" :key="`fault-${terminal.slot}`">
           <circle
             class="terminal-dot"
-            :class="[terminal.kind, { fault: terminal.fault, broken: terminal.broken }]"
+            :class="[terminal.kind, terminal.phase.toLowerCase(), { fault: terminal.fault, broken: terminal.broken }]"
             :cx="terminal.x"
             cy="232"
             r="18"
             @mouseenter="hovered = terminal"
             @mouseleave="hovered = null"
           />
-          <text class="terminal-label" :class="{ fault: terminal.fault }" :x="terminal.x" y="272">{{ terminal.label }}</text>
+          <text class="terminal-label" :class="[terminal.phase.toLowerCase(), { fault: terminal.fault }]" :x="terminal.x" y="272">{{ terminal.label }}</text>
           <text v-if="terminal.badge" class="terminal-badge" :x="terminal.x" y="192">{{ terminal.badge }}</text>
         </g>
       </g>
@@ -56,9 +56,12 @@
         <h2>三相相量坐标图</h2>
         <p>左侧为正确三相图，右侧为错接线后的测量三相图</p>
       </div>
-      <div class="legend">
-        <span><i class="voltage"></i>电压</span>
-        <span><i class="current"></i>电流</span>
+      <div class="legend phasor-legend">
+        <span><i class="phase-a"></i>A相</span>
+        <span><i class="phase-b"></i>B相</span>
+        <span><i class="phase-c"></i>C相</span>
+        <span><i class="solid-line"></i>电压</span>
+        <span><i class="current-line"></i>电流</span>
       </div>
     </div>
 
@@ -69,6 +72,15 @@
         </marker>
         <marker id="arrow-current" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
           <path d="M0,0 L8,4 L0,8 Z" fill="#f59e0b" />
+        </marker>
+        <marker id="arrow-a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 Z" fill="#f2c94c" />
+        </marker>
+        <marker id="arrow-b" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 Z" fill="#36b37e" />
+        </marker>
+        <marker id="arrow-c" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 Z" fill="#ef4e4e" />
         </marker>
       </defs>
 
@@ -86,22 +98,22 @@
           :x2="axisPoint(chart, angle, -122).x"
           :y2="axisPoint(chart, angle, -122).y"
         />
-        <text class="angle-label" :x="chart.cx + 142" :y="chart.cy + 5">0°</text>
-        <text class="angle-label" :x="chart.cx - 118" :y="chart.cy - 92">120°</text>
-        <text class="angle-label" :x="chart.cx - 125" :y="chart.cy + 108">-120°</text>
+        <text class="angle-label zero-angle" :x="chart.cx + 130" :y="chart.cy + 26">0°</text>
+        <text class="angle-label" :x="chart.cx - 124" :y="chart.cy - 98">120°</text>
+        <text class="angle-label" :x="chart.cx - 124" :y="chart.cy + 110">-120°</text>
 
         <g v-for="vector in chart.vectors" :key="vector.key">
           <line
             class="phasor-line"
-            :class="[vector.kind, { zero: vector.zero, broken: vector.broken, reversed: vector.reversed }]"
+            :class="[vector.kind, vector.phase, { zero: vector.zero, broken: vector.broken, reversed: vector.reversed }]"
             :x1="chart.cx"
             :y1="chart.cy"
             :x2="vector.x"
             :y2="vector.y"
-            :marker-end="vector.kind === 'current' ? 'url(#arrow-current)' : 'url(#arrow-voltage)'"
+            :marker-end="arrowMarker(vector)"
           />
           <circle v-if="vector.zero" class="origin-dot" :cx="chart.cx" :cy="chart.cy" r="5" />
-          <text class="phasor-label" :class="vector.kind" :x="vector.labelX" :y="vector.labelY">{{ vector.name }}</text>
+          <text class="phasor-label" :class="[vector.kind, vector.phase]" :x="vector.labelX" :y="vector.labelY">{{ vector.name }}</text>
         </g>
       </g>
     </svg>
@@ -143,14 +155,17 @@ const defaultConnections = [
   { channel: '通道3', source: 'C', broken: false, reversed: false, swapped: false, status: '正常' }
 ]
 
-const connections = computed(() => normalizeConnections(props.result?.connections))
+const voltageConnections = computed(() => normalizeConnections(props.result?.connections))
+const currentConnections = computed(() => normalizeConnections(props.currentResult?.connections))
 const faultTerminalNodes = computed(() => terminalNodes.map((terminal) => {
   if (terminal.phase === 'N') {
     return terminalViewModel(terminal, 'N', false, false, '中性线', '', 'N 端子')
   }
 
   const slotIndex = phases.indexOf(terminal.phase)
-  const connection = connections.value[slotIndex] || defaultConnections[slotIndex]
+  const connection = terminal.slotType === 'voltage'
+    ? voltageConnections.value[slotIndex] || defaultConnections[slotIndex]
+    : currentConnections.value[slotIndex] || defaultConnections[slotIndex]
   const source = connection.source
   const label = labelForSlot(terminal.slotType, source, connection.reversed)
   const broken = connection.broken
@@ -228,6 +243,7 @@ function labelForSlot(slotType, source, reversed) {
 function terminalViewModel(terminal, label, fault, broken, status, badge = '', tooltipTitle = label) {
   return {
     ...terminal,
+    phase: labelPhase(label),
     slot: terminal.key,
     label,
     fault,
@@ -243,27 +259,58 @@ function terminalViewModel(terminal, label, fault, broken, status, badge = '', t
 function buildPhasors(entries, prefix, kind, cx, cy, theoretical) {
   const maxAmp = Math.max(...entries.map((entry) => entry.amplitude || 0), 1)
   const maxRadius = kind === 'voltage' ? 104 : 72
-  return entries.map((entry, index) => {
+  return entries.flatMap((entry, index) => {
+    if (!theoretical && entry.broken) {
+      return []
+    }
+
     const name = theoretical
       ? `${prefix}${entry.phase.toLowerCase()}`
       : `${prefix}${index + 1}`
+    const phase = (entry.source || entry.phase || phases[index] || 'A').toLowerCase()
     const length = (entry.amplitude || 0) / maxAmp * maxRadius
     const radians = (entry.angle || 0) * Math.PI / 180
+    const unitX = Math.cos(radians)
+    const unitY = -Math.sin(radians)
     const x = cx + Math.cos(radians) * length
     const y = cy - Math.sin(radians) * length
-    return {
+    const labelDistance = kind === 'voltage' ? 28 : 20
+    const zero = (entry.amplitude || 0) < 0.01
+    const labelX = zero
+      ? cx + 18 + index * 10
+      : x + unitX * labelDistance
+    const labelY = zero
+      ? cy - 18 - index * 8
+      : y + unitY * labelDistance
+    return [{
       key: `${kind}-${name}`,
       name,
       kind,
+      phase,
       x,
       y,
-      labelX: x + 10,
-      labelY: y - 8,
-      zero: (entry.amplitude || 0) < 0.01,
+      labelX,
+      labelY,
+      zero,
       broken: entry.broken,
       reversed: entry.reversed
-    }
+    }]
   })
+}
+
+function arrowMarker(vector) {
+  if (['a', 'b', 'c'].includes(vector.phase)) {
+    return `url(#arrow-${vector.phase})`
+  }
+  return vector.kind === 'current' ? 'url(#arrow-current)' : 'url(#arrow-voltage)'
+}
+
+function labelPhase(label) {
+  const normalized = label.toUpperCase()
+  if (normalized.includes('A')) return 'A'
+  if (normalized.includes('B')) return 'B'
+  if (normalized.includes('C')) return 'C'
+  return 'N'
 }
 
 function axisPoint(chart, angle, radius) {

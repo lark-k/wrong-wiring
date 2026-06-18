@@ -6,13 +6,13 @@
     </div>
     <div class="vector-list">
       <div v-for="entry in entries" :key="entry.phase || entry.channel" class="vector-row">
-        <div class="vector-name">
-          <span>{{ entry.phase || entry.channel }}</span>
+        <div class="vector-name" :class="phaseClass(entry)">
+          <span :class="phaseClass(entry)">{{ entry.phase || entry.channel }}</span>
           <small v-if="entry.source">源 {{ entry.source }}</small>
         </div>
         <div class="vector-value">
           <div class="polar-line">
-            <strong>{{ entry.polar }}</strong>
+            <strong :class="phaseClass(entry)">{{ entry.polar }}</strong>
             <span v-if="statusText(entry)" class="tag compact" :class="statusClass(entry)">
               {{ statusText(entry) }}
             </span>
@@ -53,6 +53,14 @@ function statusClass(entry) {
   if (entry.reversed) {
     return 'reversed'
   }
+  return ''
+}
+
+function phaseClass(entry) {
+  const raw = String(entry.source || entry.phase || entry.channel || '').toUpperCase()
+  if (raw.includes('A') || raw.includes('1')) return 'phase-a'
+  if (raw.includes('B') || raw.includes('2')) return 'phase-b'
+  if (raw.includes('C') || raw.includes('3')) return 'phase-c'
   return ''
 }
 </script>
