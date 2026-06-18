@@ -6,18 +6,16 @@
     </div>
 
     <section class="field-group">
-      <label>模拟对象</label>
-      <div class="segmented">
-        <button type="button" :class="{ active: model.type === 'voltage' }" @click="setType('voltage')">电压</button>
-        <button type="button" :class="{ active: model.type === 'current' }" @click="setType('current')">电流</button>
-      </div>
-    </section>
-
-    <section class="field-group">
-      <label for="amplitude">幅值设置</label>
-      <div class="numeric-field">
-        <input id="amplitude" v-model.number="model.amplitude" type="number" min="0.1" step="0.1" />
-        <span>{{ model.type === 'voltage' ? 'V' : 'A' }}</span>
+      <label>幅值设置</label>
+      <div class="dual-amplitude">
+        <div class="numeric-field">
+          <input v-model.number="model.voltageAmplitude" type="number" min="0.1" step="1" />
+          <span>V</span>
+        </div>
+        <div class="numeric-field">
+          <input v-model.number="model.currentAmplitude" type="number" min="0.1" step="0.1" />
+          <span>A</span>
+        </div>
       </div>
     </section>
 
@@ -122,12 +120,4 @@ const phaseOrderText = computed({
     model.value.phaseOrder = value.split('')
   }
 })
-
-function setType(type) {
-  model.value.type = type
-  model.value.amplitude = type === 'voltage' ? 220 : 5
-  model.value.phaseAngles = type === 'voltage'
-    ? { A: 0, B: -120, C: 120 }
-    : { A: -30, B: -150, C: 90 }
-}
 </script>

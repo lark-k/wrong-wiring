@@ -18,7 +18,7 @@
 
       <section class="center-column">
         <div v-if="error" class="error-banner">{{ error }}</div>
-        <WiringDiagram :result="simulationResult" />
+        <WiringDiagram :result="voltageResult" :current-result="currentResult" />
       </section>
 
       <aside class="results-column">
@@ -27,8 +27,8 @@
         <MatrixCard title="符号矩阵 S" :matrix="simulationResult?.S || identity" description="反接相乘以 -1" :highlight="hasReversed" />
         <MatrixCard title="置换矩阵 P" :matrix="simulationResult?.P || identity" description="换相后通道读取顺序" :highlight="hasSwapped" />
         <MatrixCard title="总矩阵 M" :matrix="simulationResult?.M || identity" description="M = P · S · D" highlight />
-        <VectorCard title="理论向量 x" :entries="simulationResult?.x || []" />
-        <VectorCard title="测量向量 y" :entries="simulationResult?.y || []" />
+        <VectorCard title="理论向量 x" :entries="theoreticalEntries" />
+        <VectorCard title="测量向量 y" :entries="measuredEntries" />
       </aside>
     </div>
   </main>
@@ -45,28 +45,37 @@ import VectorCard from '../components/VectorCard.vue'
 import WiringDiagram from '../components/WiringDiagram.vue'
 
 const identity = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-const simulationResult = ref(null)
+const voltageResult = ref(null)
+const currentResult = ref(null)
 const error = ref('')
 
 const form = reactive(defaultForm())
 
+const simulationResult = computed(() => voltageResult.value)
 const hasBroken = computed(() => Object.values(form.broken).some(Boolean))
 const hasReversed = computed(() => Object.values(form.reversed).some(Boolean))
 const hasSwapped = computed(() => form.phaseOrder.join('') !== 'ABC')
+const theoreticalEntries = computed(() => mergeVectorEntries(voltageResult.value?.x, currentResult.value?.x, false))
+const measuredEntries = computed(() => mergeVectorEntries(voltageResult.value?.y, currentResult.value?.y, true))
 
 onMounted(runSimulation)
 
 async function runSimulation() {
   error.value = ''
   try {
-    simulationResult.value = await simulateWiring(toPayload())
+    const [voltage, current] = await Promise.all([
+      simulateWiring(toPayload('voltage')),
+      simulateWiring(toPayload('current'))
+    ])
+    voltageResult.value = voltage
+    currentResult.value = current
   } catch (err) {
     error.value = err.message || '仿真失败，请检查后端服务是否启动。'
   }
 }
 
 function resetForm() {
-  Object.assign(form, defaultForm(form.type))
+  Object.assign(form, defaultForm())
   runSimulation()
 }
 
@@ -95,13 +104,10 @@ function resetFaultOnly() {
   form.phaseOrder = ['A', 'B', 'C']
 }
 
-function defaultForm(type = 'voltage') {
+function defaultForm() {
   return {
-    type,
-    amplitude: type === 'voltage' ? 220 : 5,
-    phaseAngles: type === 'voltage'
-      ? { A: 0, B: -120, C: 120 }
-      : { A: -30, B: -150, C: 90 },
+    voltageAmplitude: 220,
+    currentAmplitude: 5,
     broken: { A: false, B: false, C: false },
     reversed: { A: false, B: false, C: false },
     phaseOrder: ['A', 'B', 'C'],
@@ -111,12 +117,41 @@ function defaultForm(type = 'voltage') {
   }
 }
 
-function toPayload() {
-  return JSON.parse(JSON.stringify(form))
+function toPayload(type) {
+  return {
+    type,
+    amplitude: type === 'voltage' ? form.voltageAmplitude : form.currentAmplitude,
+    phaseAngles: type === 'voltage'
+      ? { A: 0, B: -120, C: 120 }
+      : { A: -30, B: -150, C: 90 },
+    broken: { ...form.broken },
+    reversed: { ...form.reversed },
+    phaseOrder: [...form.phaseOrder],
+    noiseEnabled: form.noiseEnabled,
+    amplitudeNoisePercent: form.amplitudeNoisePercent,
+    angleNoiseDegree: form.angleNoiseDegree
+  }
+}
+
+function mergeVectorEntries(voltageEntries = [], currentEntries = [], measured) {
+  const voltage = voltageEntries.map((entry) => ({
+    ...entry,
+    phase: measured ? entry.phase : `U${entry.phase.toLowerCase()}`,
+    channel: measured ? `${entry.channel}·U` : entry.channel
+  }))
+  const current = currentEntries.map((entry) => ({
+    ...entry,
+    phase: measured ? entry.phase : `I${entry.phase.toLowerCase()}`,
+    channel: measured ? `${entry.channel}·I` : entry.channel
+  }))
+  return [...voltage, ...current]
 }
 
 function exportJson() {
-  downloadFile('wrong-wiring-result.json', JSON.stringify(simulationResult.value || {}, null, 2), 'application/json')
+  downloadFile('wrong-wiring-result.json', JSON.stringify({
+    voltage: voltageResult.value || {},
+    current: currentResult.value || {}
+  }, null, 2), 'application/json')
 }
 
 function exportCsv() {

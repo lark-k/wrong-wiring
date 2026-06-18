@@ -844,3 +844,342 @@ select {
     padding: 8px;
   }
 }
+
+/* Product Design white theme refinement */
+:root {
+  color-scheme: light;
+  background: #f4f7fb;
+  color: #172033;
+}
+
+body {
+  background:
+    linear-gradient(180deg, #ffffff 0%, #eef3f9 100%);
+}
+
+.app-shell {
+  background: #f4f7fb;
+}
+
+.header-bar,
+.fault-column,
+.results-column,
+.fault-panel,
+.results-column > article,
+.visual-stage,
+.phasor-stage {
+  border-color: #d9e3ef;
+  background: #ffffff;
+  box-shadow: 0 12px 30px rgba(42, 70, 112, 0.08);
+}
+
+.fault-column,
+.results-column {
+  background:
+    linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+}
+
+.eyebrow,
+.numeric-field span,
+.vector-row strong,
+.mini-pill,
+.phasor-label.voltage {
+  color: #2d66c3;
+}
+
+.header-bar h1,
+.stage-header h2,
+.card-title-row h3,
+.panel-heading,
+.vector-name span,
+.terminal-label,
+.target-title,
+.chart-title {
+  color: #172033;
+}
+
+.header-bar p,
+.stage-header p,
+.field-group > label,
+.row-between > label,
+.matrix-card p,
+.vector-name small,
+.vector-row small,
+.diagnosis-text,
+.legend,
+.angle-label,
+.axis-label {
+  color: #607189;
+}
+
+.ghost-button,
+.secondary-button,
+input,
+select,
+.numeric-field,
+.segmented,
+.toggle-tile {
+  color: #172033;
+  border-color: #d5dfeb;
+  background: #f8fbff;
+}
+
+.segmented button {
+  color: #607189;
+}
+
+.segmented button.active,
+.toggle-tile.active {
+  color: #ffffff;
+  background: #2d66c3;
+  border-color: #2d66c3;
+}
+
+.toggle-tile.danger.active {
+  color: #ffffff;
+  background: #d94f5f;
+  border-color: #d94f5f;
+}
+
+.primary-button {
+  color: #ffffff;
+  border-color: #2d66c3;
+  background: linear-gradient(135deg, #4777d0, #1f5ebd);
+}
+
+.secondary-button.amber {
+  color: #9a6200;
+  border-color: #f0c36b;
+  background: #fff8ea;
+}
+
+.status-badge.ok {
+  color: #157347;
+  background: #e8f7ef;
+  border-color: #bde8d1;
+}
+
+.status-badge.fault {
+  color: #b54708;
+  background: #fff4e5;
+  border-color: #fed7aa;
+}
+
+.wiring-svg,
+.phasor-svg {
+  background:
+    linear-gradient(rgba(71, 119, 208, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(71, 119, 208, 0.06) 1px, transparent 1px),
+    #ffffff;
+  background-size: 26px 26px;
+}
+
+.legend .voltage {
+  background: #3f6fc7;
+}
+
+.legend .current {
+  background: #f59e0b;
+}
+
+.legend .green {
+  background: #22a06b;
+}
+
+.legend .red {
+  background: #d94f5f;
+}
+
+.legend .dash {
+  border-top-color: #f59e0b;
+}
+
+.terminal-svg {
+  min-height: 270px;
+}
+
+.terminal-row rect {
+  fill: #ffffff;
+  stroke: #d9e3ef;
+  stroke-width: 1;
+}
+
+.row-title {
+  fill: #172033;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.terminal-dot {
+  fill: #5d7cc9;
+  stroke: #375ca8;
+  stroke-width: 2;
+}
+
+.terminal-dot.voltage {
+  fill: #5c7ecf;
+}
+
+.terminal-dot.current,
+.terminal-dot.reverse-current {
+  fill: #f2b455;
+  stroke: #c47a12;
+}
+
+.terminal-dot.neutral {
+  fill: #9aa7b7;
+  stroke: #6b7788;
+}
+
+.terminal-dot.fault {
+  fill: #f87171;
+  stroke: #c02636;
+}
+
+.terminal-dot.broken {
+  fill: #f3f4f6;
+  stroke: #f59e0b;
+  stroke-dasharray: 4 3;
+}
+
+.terminal-label {
+  font-size: 14px;
+  font-weight: 800;
+  text-anchor: middle;
+}
+
+.terminal-label.fault {
+  fill: #b42336;
+}
+
+.terminal-badge {
+  fill: #b42336;
+  font-size: 11px;
+  font-weight: 900;
+  text-anchor: middle;
+}
+
+.svg-tooltip {
+  color: #172033;
+  border-color: #d9e3ef;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 10px 24px rgba(42, 70, 112, 0.14);
+}
+
+.svg-tooltip span {
+  color: #607189;
+}
+
+.dual-phasor-svg {
+  min-height: 370px;
+}
+
+.chart-title {
+  font-size: 16px;
+  font-weight: 900;
+  text-anchor: middle;
+}
+
+.grid-ring,
+.grid-axis,
+.grid-spoke {
+  fill: none;
+  stroke: #d8e3ef;
+  stroke-width: 1;
+}
+
+.phasor-line.voltage {
+  stroke: #3f6fc7;
+  marker-end: url(#arrow-voltage);
+}
+
+.phasor-line.current {
+  stroke: #f59e0b;
+  stroke-dasharray: 7 6;
+  marker-end: url(#arrow-current);
+}
+
+.phasor-line.broken {
+  opacity: 0.55;
+}
+
+.phasor-label {
+  font-size: 13px;
+  font-weight: 900;
+  text-anchor: middle;
+}
+
+.phasor-label.current {
+  fill: #b56900;
+}
+
+.origin-dot {
+  fill: #f59e0b;
+}
+
+.matrix-grid span {
+  background: #f4f7fb;
+}
+
+.matrix-grid .zero {
+  color: #9aa7b7;
+}
+
+.matrix-grid .one {
+  color: #1d5fbf;
+  background: #eaf2ff;
+}
+
+.matrix-grid .negative {
+  color: #cf3347;
+  background: #fff0f2;
+}
+
+.diagnosis-panel {
+  background:
+    linear-gradient(135deg, rgba(245, 158, 11, 0.14), transparent 58%),
+    #ffffff !important;
+}
+
+.diagnosis-panel.ok {
+  background:
+    linear-gradient(135deg, rgba(34, 160, 107, 0.12), transparent 58%),
+    #ffffff !important;
+}
+
+.summary {
+  color: #b54708;
+}
+
+.diagnosis-panel.ok .summary {
+  color: #157347;
+}
+
+.tag.reversed {
+  color: #b42336;
+  background: #fff0f2;
+  border-color: #ffd0d7;
+}
+
+.tag.broken {
+  color: #9a6200;
+  background: #fff8ea;
+  border-color: #f0c36b;
+}
+
+.tag.muted {
+  color: #607189;
+  background: #f2f5f9;
+  border-color: #d9e3ef;
+}
+
+.break-dot {
+  fill: #ffffff;
+  stroke: #f59e0b;
+}
+
+.dual-amplitude {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}

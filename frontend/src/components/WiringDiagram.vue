@@ -2,48 +2,48 @@
   <section class="visual-stage">
     <div class="stage-header">
       <div>
-        <h2>接线图可视化</h2>
-        <p>源端到测量通道的实时映射</p>
+        <h2>端子排错接线对比图</h2>
+        <p>上排为正确端子顺序，下排直接显示当前接入后的端子位置变化</p>
       </div>
       <div class="legend">
-        <span><i class="green"></i>正常</span>
+        <span><i class="voltage"></i>电压</span>
+        <span><i class="current"></i>电流</span>
         <span><i class="red"></i>故障</span>
         <span><i class="dash"></i>断线</span>
       </div>
     </div>
 
-    <svg class="wiring-svg" viewBox="0 0 760 330" role="img" aria-label="三相接线图">
-      <g v-for="line in lineModels" :key="line.channel">
-        <path
-          class="wire-path"
-          :class="{ fault: line.fault, broken: line.broken }"
-          :d="line.path"
-          @mouseenter="hovered = line"
-          @mouseleave="hovered = null"
-        />
-        <text
-          v-if="line.reversed"
-          class="reverse-mark"
-          :x="line.midX"
-          :y="line.midY - 10"
-        >−</text>
-        <circle v-if="line.broken" class="break-dot" :cx="line.midX" :cy="line.midY" r="7" />
+    <svg class="wiring-svg terminal-svg" viewBox="0 0 860 300" role="img" aria-label="端子排错接线对比图">
+      <g class="terminal-row correct-row">
+        <text class="row-title" x="34" y="40">正确情况</text>
+        <rect x="20" y="56" width="820" height="86" rx="10" />
+        <g v-for="terminal in terminalNodes" :key="`correct-${terminal.key}`">
+          <circle class="terminal-dot" :class="terminal.kind" :cx="terminal.x" cy="92" r="18" />
+          <text class="terminal-label" :x="terminal.x" y="132">{{ terminal.label }}</text>
+        </g>
       </g>
 
-      <g v-for="node in sourceNodes" :key="node.phase">
-        <circle class="node source" :cx="node.x" :cy="node.y" r="18" />
-        <text class="node-label" :x="node.x" :y="node.y + 5">{{ node.phase }}</text>
+      <g class="terminal-row fault-row">
+        <text class="row-title" x="34" y="180">错误情况</text>
+        <rect x="20" y="196" width="820" height="86" rx="10" />
+        <g v-for="terminal in faultTerminalNodes" :key="`fault-${terminal.slot}`">
+          <circle
+            class="terminal-dot"
+            :class="[terminal.kind, { fault: terminal.fault, broken: terminal.broken }]"
+            :cx="terminal.x"
+            cy="232"
+            r="18"
+            @mouseenter="hovered = terminal"
+            @mouseleave="hovered = null"
+          />
+          <text class="terminal-label" :class="{ fault: terminal.fault }" :x="terminal.x" y="272">{{ terminal.label }}</text>
+          <text v-if="terminal.badge" class="terminal-badge" :x="terminal.x" y="192">{{ terminal.badge }}</text>
+        </g>
       </g>
 
-      <g v-for="node in channelNodes" :key="node.channel">
-        <circle class="node channel" :cx="node.x" :cy="node.y" r="18" />
-        <text class="node-label" :x="node.x" :y="node.y + 5">{{ node.index }}</text>
-        <text class="channel-label" :x="node.x + 30" :y="node.y + 5">{{ node.channel }}</text>
-      </g>
-
-      <foreignObject v-if="hovered" :x="hovered.midX - 80" :y="hovered.midY + 16" width="190" height="62">
+      <foreignObject v-if="hovered" :x="hovered.midX - 92" :y="hovered.midY - 34" width="204" height="66">
         <div class="svg-tooltip">
-          <strong>{{ hovered.source }} → {{ hovered.channel }}</strong>
+          <strong>{{ hovered.tooltipTitle }}</strong>
           <span>{{ hovered.status }}</span>
         </div>
       </foreignObject>
@@ -54,63 +54,57 @@
     <div class="stage-header compact">
       <div>
         <h2>三相相量坐标图</h2>
-        <p>理论向量 x 与测量向量 y 叠加对比</p>
+        <p>左侧为正确三相图，右侧为错接线后的测量三相图</p>
+      </div>
+      <div class="legend">
+        <span><i class="voltage"></i>电压</span>
+        <span><i class="current"></i>电流</span>
       </div>
     </div>
 
-    <svg class="phasor-svg" viewBox="0 0 760 360" role="img" aria-label="三相相量坐标图">
+    <svg class="phasor-svg dual-phasor-svg" viewBox="0 0 860 380" role="img" aria-label="正确与错误三相相量对比图">
       <defs>
-        <marker id="arrow-x" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-          <path d="M0,0 L8,4 L0,8 Z" fill="#5ce1e6" />
+        <marker id="arrow-voltage" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 Z" fill="#3f6fc7" />
         </marker>
-        <marker id="arrow-y" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-          <path d="M0,0 L8,4 L0,8 Z" fill="#ff6b6b" />
+        <marker id="arrow-current" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 Z" fill="#f59e0b" />
         </marker>
       </defs>
 
-      <g class="grid">
-        <circle v-for="r in [55, 95, 135]" :key="r" cx="280" cy="180" :r="r" />
-        <line x1="105" y1="180" x2="455" y2="180" />
-        <line x1="280" y1="20" x2="280" y2="340" />
-        <line v-for="angle in angleTicks" :key="angle" :x1="axisPoint(angle, 160).x" :y1="axisPoint(angle, 160).y" :x2="axisPoint(angle, -160).x" :y2="axisPoint(angle, -160).y" />
-      </g>
-
-      <text class="angle-label" x="462" y="184">0°</text>
-      <text class="angle-label" x="145" y="57">120°</text>
-      <text class="angle-label" x="127" y="312">-120°</text>
-      <text class="axis-label" x="464" y="164">Re</text>
-      <text class="axis-label" x="292" y="30">Im</text>
-
-      <g v-for="vector in theoreticalVectors" :key="`x-${vector.name}`">
-        <line class="phasor-line theoretical" x1="280" y1="180" :x2="vector.x" :y2="vector.y" marker-end="url(#arrow-x)" />
-        <text class="phasor-label theoretical" :x="vector.labelX" :y="vector.labelY">{{ vector.name }}</text>
-      </g>
-
-      <g v-for="vector in measuredVectors" :key="`y-${vector.name}`">
+      <g v-for="chart in phasorCharts" :key="chart.key" class="phasor-chart">
+        <text class="chart-title" :x="chart.cx" y="34">{{ chart.title }}</text>
+        <circle v-for="r in [44, 74, 104]" :key="`${chart.key}-${r}`" class="grid-ring" :cx="chart.cx" :cy="chart.cy" :r="r" />
+        <line class="grid-axis" :x1="chart.cx - 132" :y1="chart.cy" :x2="chart.cx + 132" :y2="chart.cy" />
+        <line class="grid-axis" :x1="chart.cx" :y1="chart.cy - 122" :x2="chart.cx" :y2="chart.cy + 122" />
         <line
-          class="phasor-line measured"
-          :class="{ zero: vector.zero, reversed: vector.reversed, broken: vector.broken }"
-          x1="280"
-          y1="180"
-          :x2="vector.x"
-          :y2="vector.y"
-          marker-end="url(#arrow-y)"
+          v-for="angle in angleTicks"
+          :key="`${chart.key}-axis-${angle}`"
+          class="grid-spoke"
+          :x1="axisPoint(chart, angle, 122).x"
+          :y1="axisPoint(chart, angle, 122).y"
+          :x2="axisPoint(chart, angle, -122).x"
+          :y2="axisPoint(chart, angle, -122).y"
         />
-        <circle v-if="vector.zero" class="origin-dot" cx="280" cy="180" r="6" />
-        <text class="phasor-label measured" :x="vector.labelX" :y="vector.labelY">{{ vector.name }}</text>
-      </g>
+        <text class="angle-label" :x="chart.cx + 142" :y="chart.cy + 5">0°</text>
+        <text class="angle-label" :x="chart.cx - 118" :y="chart.cy - 92">120°</text>
+        <text class="angle-label" :x="chart.cx - 125" :y="chart.cy + 108">-120°</text>
 
-      <g class="phasor-readout">
-        <text x="520" y="64">相量读数</text>
-        <g v-for="(entry, index) in result?.y || []" :key="entry.channel" :transform="`translate(520 ${98 + index * 58})`">
-          <rect width="190" height="42" rx="8" />
-          <text x="12" y="15">{{ entry.channel }} · 源 {{ entry.source }}</text>
-          <text x="12" y="31">{{ entry.polar }}</text>
-          <text v-if="entry.broken || entry.reversed" x="112" y="31">{{ vectorStatus(entry) }}</text>
+        <g v-for="vector in chart.vectors" :key="vector.key">
+          <line
+            class="phasor-line"
+            :class="[vector.kind, { zero: vector.zero, broken: vector.broken, reversed: vector.reversed }]"
+            :x1="chart.cx"
+            :y1="chart.cy"
+            :x2="vector.x"
+            :y2="vector.y"
+            :marker-end="vector.kind === 'current' ? 'url(#arrow-current)' : 'url(#arrow-voltage)'"
+          />
+          <circle v-if="vector.zero" class="origin-dot" :cx="chart.cx" :cy="chart.cy" r="5" />
+          <text class="phasor-label" :class="vector.kind" :x="vector.labelX" :y="vector.labelY">{{ vector.name }}</text>
         </g>
       </g>
     </svg>
-
   </section>
 </template>
 
@@ -121,57 +115,95 @@ const props = defineProps({
   result: {
     type: Object,
     default: null
+  },
+  currentResult: {
+    type: Object,
+    default: null
   }
 })
 
 const hovered = ref(null)
-const sourceNodes = [
-  { phase: 'A', x: 70, y: 75 },
-  { phase: 'B', x: 70, y: 165 },
-  { phase: 'C', x: 70, y: 255 }
-]
-const channelNodes = [
-  { channel: '通道1', index: '1', x: 610, y: 75 },
-  { channel: '通道2', index: '2', x: 610, y: 165 },
-  { channel: '通道3', index: '3', x: 610, y: 255 }
+const phases = ['A', 'B', 'C']
+const angleTicks = [30, 60, 120, 150]
+const terminalNodes = [
+  { key: 'Ia', label: 'Ia', phase: 'A', slotType: 'current', kind: 'current', x: 58 },
+  { key: 'Ua', label: 'Ua', phase: 'A', slotType: 'voltage', kind: 'voltage', x: 140 },
+  { key: '-Ia', label: '-Ia', phase: 'A', slotType: 'reverse-current', kind: 'reverse-current', x: 222 },
+  { key: 'Ib', label: 'Ib', phase: 'B', slotType: 'current', kind: 'current', x: 304 },
+  { key: 'Ub', label: 'Ub', phase: 'B', slotType: 'voltage', kind: 'voltage', x: 386 },
+  { key: '-Ib', label: '-Ib', phase: 'B', slotType: 'reverse-current', kind: 'reverse-current', x: 468 },
+  { key: 'Ic', label: 'Ic', phase: 'C', slotType: 'current', kind: 'current', x: 550 },
+  { key: 'Uc', label: 'Uc', phase: 'C', slotType: 'voltage', kind: 'voltage', x: 632 },
+  { key: '-Ic', label: '-Ic', phase: 'C', slotType: 'reverse-current', kind: 'reverse-current', x: 714 },
+  { key: 'N', label: 'N', phase: 'N', slotType: 'neutral', kind: 'neutral', x: 800 }
 ]
 const defaultConnections = [
   { channel: '通道1', source: 'A', broken: false, reversed: false, swapped: false, status: '正常' },
   { channel: '通道2', source: 'B', broken: false, reversed: false, swapped: false, status: '正常' },
   { channel: '通道3', source: 'C', broken: false, reversed: false, swapped: false, status: '正常' }
 ]
-const angleTicks = [30, 60, 120, 150]
 
-const lineModels = computed(() => {
-  const connections = normalizeConnections(props.result?.connections)
+const connections = computed(() => normalizeConnections(props.result?.connections))
+const faultTerminalNodes = computed(() => terminalNodes.map((terminal) => {
+  if (terminal.phase === 'N') {
+    return terminalViewModel(terminal, 'N', false, false, '中性线', '', 'N 端子')
+  }
 
-  return connections.map((connection, index) => {
-    const source = sourceNodes.find((node) => node.phase === connection.source) || sourceNodes[index]
-    const target = channelNodes[index]
-    const midX = 340
-    const midY = (source.y + target.y) / 2
-    const curve = connection.swapped ? 145 : 80
+  const slotIndex = phases.indexOf(terminal.phase)
+  const connection = connections.value[slotIndex] || defaultConnections[slotIndex]
+  const source = connection.source
+  const label = labelForSlot(terminal.slotType, source, connection.reversed)
+  const broken = connection.broken
+  const reversed = connection.reversed && terminal.slotType === 'current'
+  const swapped = connection.swapped
+  const fault = broken || reversed || swapped
+  const badge = broken ? '断线' : reversed ? '反接' : swapped ? '换相' : ''
+  const statusParts = []
+  if (swapped) statusParts.push(`${terminal.phase} 位接入 ${source} 相`)
+  if (reversed) statusParts.push(`${source} 相电流反接`)
+  if (broken) statusParts.push(`${source} 相断线`)
 
-    return {
-      ...connection,
-      fault: connection.broken || connection.reversed || connection.swapped,
-      midX,
-      midY,
-      path: `M ${source.x + 22} ${source.y} C ${source.x + curve} ${source.y}, ${target.x - curve} ${target.y}, ${target.x - 22} ${target.y}`
-    }
-  })
-})
+  return terminalViewModel(
+    terminal,
+    label,
+    fault,
+    broken,
+    statusParts.length ? statusParts.join('，') : '正常',
+    badge,
+    `${terminal.label} 位置当前为 ${label}`
+  )
+}))
 
-const theoreticalVectors = computed(() => (props.result?.x || []).map((entry) => vectorModel(entry, entry.phase, 'x')))
-const measuredVectors = computed(() => (props.result?.y || []).map((entry) => vectorModel(entry, entry.channel.replace('通道', 'y'), 'y')))
+const phasorCharts = computed(() => [
+  {
+    key: 'correct',
+    title: '正确三相图',
+    cx: 220,
+    cy: 205,
+    vectors: [
+      ...buildPhasors(props.result?.x || [], 'U', 'voltage', 220, 205, true),
+      ...buildPhasors(props.currentResult?.x || [], 'I', 'current', 220, 205, true)
+    ]
+  },
+  {
+    key: 'fault',
+    title: '错接线测量图',
+    cx: 640,
+    cy: 205,
+    vectors: [
+      ...buildPhasors(props.result?.y || [], 'U', 'voltage', 640, 205, false),
+      ...buildPhasors(props.currentResult?.y || [], 'I', 'current', 640, 205, false)
+    ]
+  }
+])
 
-function normalizeConnections(connections) {
-  if (!Array.isArray(connections) || connections.length !== 3) {
+function normalizeConnections(rawConnections) {
+  if (!Array.isArray(rawConnections) || rawConnections.length !== 3) {
     return defaultConnections
   }
-  return connections.map((connection, index) => ({
+  return rawConnections.map((connection, index) => ({
     channel: connection.channel || `通道${index + 1}`,
-    source: connection.source || ['A', 'B', 'C'][index],
+    source: connection.source || phases[index],
     broken: Boolean(connection.broken),
     reversed: Boolean(connection.reversed),
     swapped: Boolean(connection.swapped),
@@ -179,45 +211,66 @@ function normalizeConnections(connections) {
   }))
 }
 
-function vectorModel(entry, name, kind) {
-  const maxAmp = Math.max(...[...(props.result?.x || []), ...(props.result?.y || [])].map((item) => item.amplitude || 0), 1)
-  const scale = 135 / maxAmp
-  const length = (entry.amplitude || 0) * scale
-  const radians = (entry.angle || 0) * Math.PI / 180
-  const x = 280 + Math.cos(radians) * length
-  const y = 180 - Math.sin(radians) * length
-  const labelOffset = kind === 'x' ? 12 : 24
+function labelForSlot(slotType, source, reversed) {
+  const phase = source.toLowerCase()
+  if (slotType === 'voltage') {
+    return `U${phase}`
+  }
+  if (slotType === 'current') {
+    return reversed ? `-I${phase}` : `I${phase}`
+  }
+  if (slotType === 'reverse-current') {
+    return reversed ? `I${phase}` : `-I${phase}`
+  }
+  return 'N'
+}
 
+function terminalViewModel(terminal, label, fault, broken, status, badge = '', tooltipTitle = label) {
   return {
-    name,
-    x,
-    y,
-    labelX: x + labelOffset,
-    labelY: y - labelOffset,
-    zero: (entry.amplitude || 0) < 0.01,
-    reversed: entry.reversed,
-    broken: entry.broken
+    ...terminal,
+    slot: terminal.key,
+    label,
+    fault,
+    broken,
+    status,
+    badge,
+    tooltipTitle,
+    midX: terminal.x,
+    midY: 216
   }
 }
 
-function axisPoint(angle, radius) {
+function buildPhasors(entries, prefix, kind, cx, cy, theoretical) {
+  const maxAmp = Math.max(...entries.map((entry) => entry.amplitude || 0), 1)
+  const maxRadius = kind === 'voltage' ? 104 : 72
+  return entries.map((entry, index) => {
+    const name = theoretical
+      ? `${prefix}${entry.phase.toLowerCase()}`
+      : `${prefix}${index + 1}`
+    const length = (entry.amplitude || 0) / maxAmp * maxRadius
+    const radians = (entry.angle || 0) * Math.PI / 180
+    const x = cx + Math.cos(radians) * length
+    const y = cy - Math.sin(radians) * length
+    return {
+      key: `${kind}-${name}`,
+      name,
+      kind,
+      x,
+      y,
+      labelX: x + 10,
+      labelY: y - 8,
+      zero: (entry.amplitude || 0) < 0.01,
+      broken: entry.broken,
+      reversed: entry.reversed
+    }
+  })
+}
+
+function axisPoint(chart, angle, radius) {
   const radians = angle * Math.PI / 180
   return {
-    x: 280 + Math.cos(radians) * radius,
-    y: 180 - Math.sin(radians) * radius
+    x: chart.cx + Math.cos(radians) * radius,
+    y: chart.cy - Math.sin(radians) * radius
   }
-}
-
-function vectorStatus(entry) {
-  if (entry.broken && entry.reversed) {
-    return '断线优先'
-  }
-  if (entry.broken) {
-    return '断线'
-  }
-  if (entry.reversed) {
-    return '反接'
-  }
-  return ''
 }
 </script>
