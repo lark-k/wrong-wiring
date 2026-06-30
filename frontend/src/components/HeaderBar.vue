@@ -2,8 +2,7 @@
   <header class="header-bar">
     <div>
       <div class="eyebrow">Three-phase Matrix Lab</div>
-      <h1>错接线矩阵可视化仿真系统</h1>
-      <p>基于 D / S / P 矩阵的三相电压电流错接线模拟</p>
+      <h1>基于矩阵计算的电能表错接线仿真识别系统</h1>
     </div>
     <div class="header-actions">
       <button class="ghost-button" type="button" @click="$emit('export-json')">

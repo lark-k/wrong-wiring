@@ -16,6 +16,7 @@ public record SimulationRequest(
         @NotNull List<String> phaseOrder,
         boolean noiseEnabled,
         double amplitudeNoisePercent,
-        double angleNoiseDegree
+        double angleNoiseDegree,
+        Long seed
 ) {
 }

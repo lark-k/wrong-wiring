@@ -4,7 +4,7 @@
       <h3>{{ title }}</h3>
       <span v-if="identity" class="mini-pill">正确接线</span>
     </div>
-    <p>{{ description }}</p>
+    <p v-if="description">{{ description }}</p>
     <div class="matrix-grid">
       <span
         v-for="(value, index) in flattened"

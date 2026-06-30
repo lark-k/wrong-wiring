@@ -3,7 +3,7 @@
     <div class="stage-header">
       <div>
         <h2>端子排错接线对比图</h2>
-        <p>上排为正确端子顺序，下排直接显示当前接入后的端子位置变化</p>
+        <p>上排为正确端子顺序，下排显示当前接入后的端子位置变化</p>
       </div>
       <div class="legend">
         <span><i class="voltage"></i>电压</span>
@@ -54,12 +54,12 @@
     <div class="stage-header compact">
       <div>
         <h2>三相相量坐标图</h2>
-        <p>左侧为正确三相图，右侧为错接线后的测量三相图</p>
+        <p>左侧为理论正确三相图，右侧为错接线后的仿真现场测量图</p>
       </div>
       <div class="legend phasor-legend">
-        <span><i class="phase-a"></i>A相</span>
-        <span><i class="phase-b"></i>B相</span>
-        <span><i class="phase-c"></i>C相</span>
+        <span><i class="phase-a"></i>A 相</span>
+        <span><i class="phase-b"></i>B 相</span>
+        <span><i class="phase-c"></i>C 相</span>
         <span><i class="solid-line"></i>电压</span>
         <span><i class="current-line"></i>电流</span>
       </div>
@@ -169,13 +169,13 @@ const faultTerminalNodes = computed(() => terminalNodes.map((terminal) => {
   const source = connection.source
   const label = labelForSlot(terminal.slotType, source, connection.reversed)
   const broken = connection.broken
-  const reversed = connection.reversed && terminal.slotType === 'current'
+  const reversed = connection.reversed && terminal.slotType !== 'neutral'
   const swapped = connection.swapped
   const fault = broken || reversed || swapped
   const badge = broken ? '断线' : reversed ? '反接' : swapped ? '换相' : ''
   const statusParts = []
   if (swapped) statusParts.push(`${terminal.phase} 位接入 ${source} 相`)
-  if (reversed) statusParts.push(`${source} 相电流反接`)
+  if (reversed) statusParts.push(`${source} 相反接`)
   if (broken) statusParts.push(`${source} 相断线`)
 
   return terminalViewModel(
@@ -192,7 +192,7 @@ const faultTerminalNodes = computed(() => terminalNodes.map((terminal) => {
 const phasorCharts = computed(() => [
   {
     key: 'correct',
-    title: '正确三相图',
+    title: '理论正确三相图',
     cx: 220,
     cy: 205,
     vectors: [
@@ -202,7 +202,7 @@ const phasorCharts = computed(() => [
   },
   {
     key: 'fault',
-    title: '错接线测量图',
+    title: '仿真现场测量图',
     cx: 640,
     cy: 205,
     vectors: [
@@ -229,7 +229,7 @@ function normalizeConnections(rawConnections) {
 function labelForSlot(slotType, source, reversed) {
   const phase = source.toLowerCase()
   if (slotType === 'voltage') {
-    return `U${phase}`
+    return reversed ? `-U${phase}` : `U${phase}`
   }
   if (slotType === 'current') {
     return reversed ? `-I${phase}` : `I${phase}`

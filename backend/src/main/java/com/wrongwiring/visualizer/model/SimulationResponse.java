@@ -14,6 +14,11 @@ public record SimulationResponse(
         List<ConnectionEntry> connections,
         String diagnosis,
         String summary,
-        Instant calculatedAt
+        Instant calculatedAt,
+        List<VectorEntry> y0,
+        List<NoiseEntry> noise,
+        List<CandidateMatch> topMatches,
+        int candidateCount,
+        FaultDescriptor trueFault
 ) {
 }

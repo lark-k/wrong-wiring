@@ -23,7 +23,7 @@
       <div class="subpanel-title">{{ group.title }}</div>
 
       <div class="field-group compact">
-        <label>断相选择</label>
+        <label>断相</label>
         <div class="phase-grid">
           <button
             v-for="phase in phases"
@@ -33,13 +33,13 @@
             type="button"
             @click="model[group.key].broken[phase] = !model[group.key].broken[phase]"
           >
-            {{ phase }}相断线
+            {{ phase }} 相断线
           </button>
         </div>
       </div>
 
       <div class="field-group compact">
-        <label>反接选择</label>
+        <label>反接</label>
         <div class="phase-grid">
           <button
             v-for="phase in phases"
@@ -49,13 +49,13 @@
             type="button"
             @click="model[group.key].reversed[phase] = !model[group.key].reversed[phase]"
           >
-            {{ phase }}相反接
+            {{ phase }} 相反接
           </button>
         </div>
       </div>
 
       <div class="field-group compact">
-        <label :for="`${group.key}PhaseOrder`">换相选择</label>
+        <label :for="`${group.key}PhaseOrder`">换相</label>
         <select :id="`${group.key}PhaseOrder`" :value="model[group.key].phaseOrder.join('')" @change="setPhaseOrder(group.key, $event.target.value)">
           <option v-for="option in orderOptions" :key="option.value" :value="option.value">
             {{ option.label }}
@@ -87,7 +87,7 @@
     <div class="button-stack">
       <button class="primary-button" type="button" @click="$emit('simulate')">
         <Play :size="18" />
-        开始仿真
+        生成并识别
       </button>
       <button class="secondary-button" type="button" @click="$emit('reset')">
         <RotateCcw :size="18" />
